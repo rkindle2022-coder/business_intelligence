@@ -6,5 +6,5 @@
 
 \# Data acquisition and transformation, data visualization and communication, exploratory data mining
 
-
-
+\# Skills
+\# SQL and PowerBI and Databricks
