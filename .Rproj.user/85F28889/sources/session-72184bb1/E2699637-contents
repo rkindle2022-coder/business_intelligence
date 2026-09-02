@@ -1,0 +1,44 @@
+---
+title: "Class 3 - R basics"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    number_section: TRUE
+    code_folding: show
+    code_download: TRUE
+date: "2026-08-31"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Cincinnati Crash Data
+
+```{r cincy_crashes}
+crashes_per_day = 30125 / 365
+crashes_per_day
+```
+
+```{r cincycrash_examples}
+crashes_by_day = c(2020, 2241, 2327, 2285,
+                   2380, 1866, 1664)
+names(crashes_by_day) = c("Mon", "Tue", "Wed", "Thu",
+                          "Fri", "Sat", "Sun")
+crashes_by_day
+
+crashes_by_day > 2000        # seven answers
+
+sum(crashes_by_day > 2000)   # days above 2,000
+
+mean(crashes_by_day)
+```
+
+```{r data_types}
+typeof(TRUE)     # logical
+typeof(401L)     # integer: the L
+typeof(401)      # double: no L
+typeof("401")    # character: quotes
+```
+
