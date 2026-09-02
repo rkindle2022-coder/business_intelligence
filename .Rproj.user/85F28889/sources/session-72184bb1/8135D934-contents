@@ -1,6 +1,12 @@
 ---
 title: "Class 04"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    number_sections: TRUE
+    code_download: TRUE
+    code_folding: show
 date: "2026-09-02"
 ---
 
@@ -8,22 +14,77 @@ date: "2026-09-02"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Data frames
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r df}
+crashes_by_day = c(2020, 2241, 2327, 2285, 2380, 1866, 1664)
+names(crashes_by_day) = c("Mon", "Tue", "Wed", "Thu",
+                          "Fri", "Sat", "Sun")
+crashes_by_day[2]                      # one position
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+crashes_df = tibble::tibble(
+  day     = names(crashes_by_day),
+  crashes = crashes_by_day,
+  busy    = crashes_by_day > 2000
+)
+crashes_df
 
-```{r cars}
-summary(cars)
+dplyr::glimpse(crashes_df)
 ```
 
-## Including Plots
+## Examine a job ad
 
-You can also embed plots, for example:
+```{r job_ad}
+job = list(
+  title   = "Research Data Scientist, Magic Eye",
+  company = "Google",
+  salary  = list(min = 147000, max = 210000)
+)
+str(job)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Questions:
+# 1. The company name. -- Google
+job$company
+# 2. The maximum salary. -- 210000
+job$salary$max
+# 3. The maximum salary again, using only [[ ]]. -- Still 210000
+job[[3]][[2]]
+# 4. The names of the elements in job. -- title, company, salary
+names(job)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Subsetting
+
+### Vectors
+
+```{r vectors}
+crashes_by_day = c(2020, 2241, 2327, 2285, 2380, 1866, 1664)
+names(crashes_by_day) = c("Mon", "Tue", "Wed", "Thu",
+                          "Fri", "Sat", "Sun")
+crashes_by_day[2]                      # one position
+crashes_by_day[crashes_by_day > 2300]  # by condition
+crashes_by_day[2:4] # Consecutive numbers
+crashes_by_day[c('Mon', 'Fri')] # Pulling separate numbers
+
+# Subsetting a data frame
+crashes_df = tibble::tibble(
+  day     = names(crashes_by_day),
+  crashes = crashes_by_day,
+  busy    = crashes_by_day > 2000)
+crashes_df$crashes                     # one column, as a vector
+
+crashes_df[["crashes"]]                # the same vector, by name
+
+crashes_df[1:2, c("day", "crashes")]   # rows 1 to 2, two columns
+```
+
+# Ohio Jobs
+
+```{r jobs}
+oh_jobs = readr::read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=IHLIDXUSOH&scale=left&cosd=2021-08-21&coed=2026-08-28&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily%2C%207-Day&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2026-09-02&revision_date=2026-09-02&nd=2020-02-01")
+
+dplyr::glimpse(oh_jobs)
+
+```
+
+
