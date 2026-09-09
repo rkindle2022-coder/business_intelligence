@@ -1,0 +1,66 @@
+---
+title: "Class 5"
+author: "Robert Kindle"
+date: "2026-09-09"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    numbered_sections: true
+    code_download: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Display of the tables for the first game in the slides
+
+```{r}
+campus = jsonlite::fromJSON(
+  "https://isa401-find-your-seat.vercel.app/campus.json")
+
+#campus = jsonlite::fromJSON(
+  #"https://isa401-find-your-seat.vercel.app/campus.json")
+#campus[["Farmer"]]$code                      # "MUFSB"
+#campus$Farmer$floors[["2"]]$sections        # 80
+#r = campus$Farmer$floors[["2"]]$rooms
+#r$isa_sections[r$room == "2050"]             # 11
+
+# ^ This is the code that would be used to find the answers to the game
+```
+
+## Reading the excel file
+
+```{r occupations}
+occupation = readxl::read_excel(
+  path = "data/occupation.xlsx",
+  sheet = 5, # sheet = "Table 1.4"
+  skip = 1
+)
+# The - is used to subset in R drops specific things. Make sure to use the "," after the () to keep all other columns
+occupation = occupation[-c(32, 33, 34), ]
+```
+
+## Web-served JSON file
+
+```{r read_json}
+json_url = "https://data.cincinnati-oh.gov/resource/rvmt-pkmq.json?$limit=100"
+crashes_json = jsonlite::fromJSON(json_url)
+dplyr::glimpse(
+  crashes_json[, c("crashdate", "dayofweek",
+                   "crashseverity", "age")])
+# or dplyr::glimpse(crashes_json)
+```
+
+### Game 2
+
+```{r}
+logins = readr::read_csv("https://isa401-import-heist.vercel.app/api/stage1")
+
+log = jsonlite::fromJSON("https://isa401-import-heist.vercel.app/api/stage2?key=ACCOUNT")
+
+jsonlite::fromJSON("https://isa401-import-heist.vercel.app/api/finish?code=NUMBER")
+```
+

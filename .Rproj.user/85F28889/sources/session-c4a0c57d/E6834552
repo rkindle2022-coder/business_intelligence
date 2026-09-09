@@ -1,27 +1,27 @@
 {
-    "id": "8135D934",
-    "path": "M:/business_intelligence/markdowns/class4_subsetting_importexport.Rmd",
-    "project_path": "markdowns/class4_subsetting_importexport.Rmd",
+    "id": "E6834552",
+    "path": "M:/business_intelligence/markdowns/class5_dataimport2_sql_firstapp.Rmd",
+    "project_path": "markdowns/class5_dataimport2_sql_firstapp.Rmd",
     "type": "r_markdown",
-    "hash": "923364802",
+    "hash": "1734773346",
     "contents": "",
     "dirty": false,
-    "created": 1788358640385.0,
+    "created": 1788962596782.0,
     "source_on_save": false,
     "relative_order": 2,
     "properties": {
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "85,22",
-        "scrollLine": "74"
+        "cursorPosition": "63,83",
+        "scrollLine": "43"
     },
     "folds": "",
-    "lastKnownWriteTime": 1788361865,
+    "lastKnownWriteTime": 1788967437,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1788361866856,
+    "last_content_update": 1788967439052,
     "read_only": false,
     "read_only_alternatives": []
 }
