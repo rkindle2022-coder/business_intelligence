@@ -1,0 +1,48 @@
+---
+title: "Class 7 - Data wrangling DPLYR"
+author: "Robert Kindle"
+date: "2026-09-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Example in class
+```{r}
+con = DBI::dbConnect(RSQLite::SQLite(), "../data/scout.db")
+postings = DBI::dbReadTable(con, "scout_postings") |> tibble::as_tibble()
+DBI::dbDisconnect(con)
+
+jobs = postings |>
+  dplyr::select(company, location_state, remote, posted_at, last_seen_at) |>
+  dplyr::filter(remote == 1) |>
+  dplyr::mutate(
+    posted_at = as.Date(posted_at),
+    last_seen_at = as.Date(last_seen_at),
+    days_open = as.numeric(last_seen_at - posted_at)) |>
+```
+
+# Demo Q1
+
+```{r}
+con = DBI::dbConnect(RSQLite::SQLite(), "../data/scout.db")
+postings = DBI::dbReadTable(con, "scout_postings") |> tibble::as_tibble()
+DBI::dbDisconnect(con)
+
+jobs = postings |>
+  dplyr::select(company, title, location_state, remote, category, posted_at, last_seen_at) |>
+  dplyr::mutate(dplyr::across(dplyr::ends_with("_at"), as.Date),
+                days_open = as.numeric(last_seen_at - posted_at))
+
+
+jobs |>
+  # I want to move from unit of analysis being a job posting to a category
+  dplyr::group_by(category) |>
+  dplyr::summarise(
+    postings = dplyr::n()
+    remote_share = mean(remote)
+  )
+```
+
