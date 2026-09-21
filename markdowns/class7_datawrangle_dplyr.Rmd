@@ -44,5 +44,47 @@ jobs |>
     postings = dplyr::n()
     remote_share = mean(remote)
   )
+
+# Different answer than slideshow, same answer
+jobs |>
+  dplyr::group_by(category, location_state) |>
+  dplyr::summarise(
+    postings = dplyr::n()
+    remote_share = mean(remote) |> round(digits = 2)
+  ) |>
+  dplyr::arrange(dplyr::desc(remote_share)) |>
+  na.omit() # Drops anything that has NA
+```
+
+
+```{r, airbnb_ex}
+con = DBI::dbConnect(RSQLite::SQLite(), "../data/midwest_airbnb.db")
+listings = DBI::dbReadTable(con, "listings") |>
+  tibble::as_tibble()
+DBI::dbDisconnect(con)
+dplyr::glimpse(listings)
+
+# Q1
+listings |> dplyr::count(city)
+
+# Q2
+listings |>
+  dplyr::filter(
+    room_type == "Entire home/apt" & accommodates >= 4
+  ) |>
+  dplyr::group_by(city) |>
+  dplyr::summarise(
+    median_price = median(price)
+  )
+
+# Q3
+listings |>
+  dplyr::mutate(price_per_person = price / accommodates) |>
+  dplyr::select(city, host_name, price, accommodates, price_per_person) |>
+  dplyr::arrange(price_per_person) |>
+  head(3)
+
+# Q4
+listings |> dplyr::count(host_name, host_id, sort = T)
 ```
 
