@@ -6,6 +6,12 @@ A twelve-line [querychat](https://github.com/posit-dev/querychat) app built in I
 
 **Live app:** https://midwest-airbnb-chat-tof1.onre
 
+Example questions and answers:
+
+![Picture of the question "How many listings are in each of the 3 cities?" and the query result](images/Screenshot 2026-09-25 125428.png)
+![Picture of the question "What is the average of all rated listings?" and the query result](images/Screenshot 2026-09-25 130120.png)
+![Picture of the question "What is the average price of listings made in chicago?" and the query result](images/Screenshot 2026-09-25 130308.png)
+
 ---
 
 ## What is this app?
