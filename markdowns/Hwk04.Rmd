@@ -1,0 +1,16 @@
+---
+title: "Hwk04"
+author: "Robert Kindle"
+date: "2026-09-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r question_1}
+con = DBI::dbConnect(RSQLite::SQLite(), "../Data/midwest_airbnb.db")
+listings = DBI::dbReadTable(con, "listings")
+```
+
