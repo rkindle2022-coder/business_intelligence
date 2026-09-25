@@ -8,7 +8,7 @@ A twelve-line [querychat](https://github.com/posit-dev/querychat) app built in I
 
 Example questions and answers:
 
-![Picture of the question "How many listings are in each of the 3 cities?" and the query result](Screenshot2026-09-25125428.png)
+![Picture of the question "How many listings are in each of the 3 cities?" and the query result](images/Screenshot2026-09-25125428.png)
 ![Picture of the question "What is the average of all rated listings?" and the query result](Screenshot2026-09-25130120.png)
 ![Picture of the question "What is the average price of listings made in chicago?" and the query result](Screenshot2026-09-25130308.png)
 
