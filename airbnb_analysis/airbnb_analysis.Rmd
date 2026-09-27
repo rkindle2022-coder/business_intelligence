@@ -1,0 +1,230 @@
+---
+title: "airbnb_analysis"
+author: "Robert Kindle"
+date: "2026-09-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R chunk
+```{r}
+con = DBI::dbConnect(RSQLite::SQLite(), "../data/midwest_airbnb_extended/midwest_airbnb_extended.db")
+listings     = DBI::dbReadTable(con, "listings") |> tibble::as_tibble()
+availability = DBI::dbReadTable(con, "availability_monthly") |> tibble::as_tibble()
+reviews      = DBI::dbReadTable(con, "reviews_monthly") |> tibble::as_tibble()
+DBI::dbDisconnect(con)
+```
+
+## Task 1
+
+```{r}
+host_counts = listings |>
+  dplyr::group_by(host_id) |>
+  dplyr::summarize(total_listings = dplyr::n())
+
+listings_with_counts = listings |>
+  dplyr::left_join(host_counts, by = "host_id")
+
+a1_answer = host_counts |>
+  dplyr::filter(total_listings >= 10) |>
+  dplyr::summarize(num_big_hosts = dplyr::n())
+
+a1_answer
+
+a2_answer = listings_with_counts |>
+  dplyr::filter(city == "Chicago") |>
+  dplyr::summarize(
+    big_host_listings = sum(total_listings >= 10, na.rm = TRUE),
+    total_chicago_listings = dplyr::n(),
+    percent_big_hosts = big_host_listings / total_chicago_listings * 100
+  )
+
+a2_answer
+```
+## Task 2
+
+```{r}
+value_analysis = listings |>
+  dplyr::filter(
+    room_type == "Entire home/apt",
+    accommodates >= 4,
+    number_of_reviews >= 10,
+    review_scores_rating >= 4.8
+  ) |>
+  dplyr::mutate(price_per_person = price / accommodates) |>
+  dplyr::group_by(city, neighbourhood) |>
+  dplyr::summarize(
+    median_price_per_person = median(price_per_person, na.rm = TRUE),
+    num_listings = dplyr::n()
+  ) |>
+  dplyr::filter(num_listings >= 20)
+
+a3_answer = value_analysis |>
+  dplyr::filter(city == "Columbus") |>
+  dplyr::arrange(median_price_per_person)
+
+a3_answer
+
+```
+
+## Task 3
+
+```{r}
+earnings_analysis = listings |>
+  dplyr::group_by(city, room_type) |>
+  dplyr::summarize(
+    dplyr::across(
+      c(price, reviews_per_month, estimated_revenue_l365d),
+      ~ median(.x, na.rm = TRUE),
+      .names = "median_{.col}"
+    )
+  )
+
+earnings_analysis
+
+a4_answer = earnings_analysis |>
+  dplyr::filter(city == "Twin Cities", room_type == "Entire home/apt")
+
+a4_answer
+
+```
+
+## Task 4
+
+```{r}
+concentration_analysis = listings |>
+  dplyr::group_by(city) |>
+  dplyr::arrange(dplyr::desc(estimated_revenue_l365d), .by_group = TRUE) |>
+  dplyr::mutate(
+    rank_in_city = dplyr::row_number(),
+    n_in_city = dplyr::n(),
+    is_top10pct = rank_in_city <= ceiling(0.10 * n_in_city)
+  )
+
+a5_answer = concentration_analysis |>
+  dplyr::filter(city == "Columbus") |>
+  dplyr::summarize(
+    top10_revenue = sum(estimated_revenue_l365d[is_top10pct], na.rm = TRUE),
+    total_revenue = sum(estimated_revenue_l365d, na.rm = TRUE),
+    percent_from_top10 = top10_revenue / total_revenue * 100
+  )
+
+a5_answer
+
+```
+
+## Task 5
+
+```{r}
+oct_availability = availability |>
+  dplyr::filter(month == "2026-10")
+
+entire_homes_oct = listings |>
+  dplyr::filter(room_type == "Entire home/apt") |>
+  dplyr::left_join(oct_availability, by = "id") |>
+  dplyr::mutate(mostly_taken = nights_available < 0.5 * nights_in_month)
+
+city_summary = entire_homes_oct |>
+  dplyr::group_by(city) |>
+  dplyr::summarize(
+    share_mostly_taken = mean(mostly_taken, na.rm = TRUE)
+  ) |>
+  dplyr::arrange(share_mostly_taken)
+
+city_summary
+```
+
+## Task 6
+
+```{r}
+seasonal_analysis = reviews |>
+  dplyr::filter(month >= "2025-07", month <= "2026-06") |>
+  dplyr::left_join(listings, by = "id") |>
+  dplyr::group_by(city, month) |>
+  dplyr::summarize(
+    total_reviews = sum(reviews, na.rm = TRUE)
+  )
+
+twin_cities_seasonal = seasonal_analysis |>
+  dplyr::filter(city == "Twin Cities") |>
+  dplyr::arrange(dplyr::desc(total_reviews))
+
+twin_cities_seasonal
+
+busiest = twin_cities_seasonal |>
+  dplyr::filter(total_reviews == max(total_reviews))
+
+quietest = twin_cities_seasonal |>
+  dplyr::filter(total_reviews == min(total_reviews))
+
+a9_ratio = busiest$total_reviews / quietest$total_reviews
+
+busiest
+quietest
+a9_ratio
+```
+
+## Task 7
+
+```{r}
+entire_homes_known = listings |>
+  dplyr::filter(
+    room_type == "Entire home/apt",
+    !is.na(host_is_superhost)
+  )
+
+superhost_stats = entire_homes_known |>
+  dplyr::filter(host_is_superhost == "t") |>
+  dplyr::group_by(city) |>
+  dplyr::summarize(
+    median_price_superhost = median(price, na.rm = TRUE),
+    median_rating_superhost = median(review_scores_rating, na.rm = TRUE)
+  )
+
+other_stats = entire_homes_known |>
+  dplyr::filter(host_is_superhost == "f") |>
+  dplyr::group_by(city) |>
+  dplyr::summarize(
+    median_price_other = median(price, na.rm = TRUE),
+    median_rating_other = median(review_scores_rating, na.rm = TRUE)
+  )
+
+premium_analysis = superhost_stats |>
+  dplyr::left_join(other_stats, by = "city") |>
+  dplyr::mutate(
+    price_premium = median_price_superhost - median_price_other
+  )
+
+premium_analysis
+```
+
+## Task 8
+
+```{r}
+listings_no_availability = listings |>
+  dplyr::anti_join(availability, by = "id")
+
+a10_answer = listings_no_availability |>
+  dplyr::summarize(num_no_availability = dplyr::n())
+
+a10_answer
+
+by_city = listings_no_availability |>
+  dplyr::group_by(city) |>
+  dplyr::summarize(num_no_availability = dplyr::n()) |>
+  dplyr::arrange(dplyr::desc(num_no_availability))
+
+by_city
+```
+
+## Section B Question 1
+
+Based on our data, Twin Cities superhosts actually charge a median of about $1.38 less than non-superhosts for entire homes — a difference small enough that it's essentially negligible. This suggests the Superhost badge alone is unlikely to let this host raise their price. Before telling them the badge isn't worth pursuing, though, I'd check the median rating premium between superhosts and other hosts — if superhosts still earn meaningfully higher guest satisfaction or more bookings (e.g., via reviews_per_month or estimated_revenue_l365d), the badge could still be valuable for demand and occupancy, even if it doesn't support charging a higher nightly rate.
+
+## Section B Question 2
+
+The rule would change Columbus the most, since 37% of its listings are held by hosts with 10 or more listings — compared to 32% in Chicago and only 17% in Twin Cities — meaning the largest share of its market would need to restructure or change hands. However, this data cannot tell the council whether smaller hosts would actually step in to absorb the freed-up listings and demand, or whether that supply would simply disappear from the market altogether.
+
