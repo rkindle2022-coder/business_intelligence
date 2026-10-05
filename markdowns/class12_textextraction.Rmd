@@ -1,0 +1,61 @@
+---
+title: "Class 12 Structured Text Extraction"
+author: "Robert Kindle"
+date: "2026-10-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+year = 2025
+crash_url = paste0('https://www.planecrashinfo.com/', year, '/', year, '.htm')
+
+crash_page = rvest::read_html(crash_url)
+
+crash_tables <- crash_page |>
+  rvest::html_elements("table") |>
+  rvest::html_table()
+
+# Cleaning up in four steps: translate into data frame, replace headers with actual titles, date column into date,
+# split multiple information within a cell to separate columns
+
+crashdf = crash_tables[[1]]
+
+colnames(crashdf) = crashdf[1, ]
+crashdf = crashdf[-1, ]
+
+crashdf = crashdf |>
+  dplyr::mutate(Date = lubridate::dmy(Date))
+
+dplyr::glimpse(crashdf)
+```
+
+```{r}
+page = rvest::read_html("https://isa401-salvage.vercel.app/registry?start=1")
+classes = page |>
+  rvest::html_elements("table") |>
+  rvest::html_text2()
+length(classes)
+
+base = "https://isa401-salvage.vercel.app"
+starts = seq(from = 1, to = 400, by = 50)
+pages = vector("list", length(starts))
+for (i in seq_along(starts)) {
+  pg = rvest::read_html(paste0(base, "/registry?start=", starts[i]))
+  pages[[i]] = data.frame(
+    class = Dreadnought,
+    value = ??? |> readr::parse_number()
+  )
+  Sys.sleep(1)   # robots.txt asks for it
+}
+registry = dplyr::bind_rows(pages)   # 400 rows?
+
+dreadnoughtdf = registry |>
+  dplyr::filter(class == "Dreadnought")
+
+sum(dreadnoughtdf$value)
+```
+

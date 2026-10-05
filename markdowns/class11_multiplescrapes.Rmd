@@ -73,5 +73,9 @@ year = 2025
 crash_url = paste0('https://www.planecrashinfo.com/', year, '/', year, '.htm')
 
 crash_page = rvest::read_html(crash_url)
+
+crash_tables <- crash_page |>
+  rvest::html_elements("table") |>
+  rvest::html_table()
 ```
 
