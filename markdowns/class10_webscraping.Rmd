@@ -1,0 +1,71 @@
+---
+title: "Class 10 Web scraping"
+author: "Robert Kindle"
+date: "2026-09-28"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_download: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## robots.txt example with MU bulletin
+
+```{r}
+# In this chunk we used robots.txt to check if we are allowed to write a program that scrapes the page (miami bulletin)
+robotstxt::paths_allowed(
+  paths = "courses-instruction/isa/",
+  domain = "https://bulletin.miamioh.edu/"
+)
+
+# Check for additional three sites
+robotstxt::paths_allowed(
+  paths = "/wiki/Miami_RedHawks_football",
+  domain = "en.wikipedia.org"
+)
+
+robotstxt::paths_allowed(
+  paths = "/jobs/",
+  domain = "www.linkedin.com"
+)
+
+robotstxt::paths_allowed(
+  paths = "/jobs", "/viewjob",
+  domain = "www.indeed.com"
+)
+```
+
+
+## Scrape Miami Bulletin
+
+```{r}
+# Check permission to scrape
+robotstxt::paths_allowed(
+  paths = "courses-instruction/isa/",
+  domain = "https://bulletin.miamioh.edu/"
+)
+
+# Loading the backend of the HTML using rvest::read_html() or rvest:: read_html_live() if page has dynamic content
+# OR craft a request as shown in slides httr2::request() -> httr2::resp_body_html()
+isa_courses_in_r = rvest::read_html("https://bulletin.miamioh.edu/courses-instructions/isa/")
+
+# We will extract course titles
+#CSS Selector was obtained by either (highlighting and right-clicking to inspect) or (right-click, copy, copy selector)
+isa_courses_in_r |>
+  rvest::html_elements("#sc_sccoursedescs > div > p.courseblocktitle > strong") |>
+  rvest::html_text2() -> isa_titles
+
+# Course descriptions using selector gadgets
+isa_courses_in_r |>
+  rvest::html_elements(".courseblockdesc") |>
+  rvest::html_text2() -> isa_desc
+
+df = data.frame(title = isa_titles, description = isa_desc)
+```
+

@@ -1,0 +1,81 @@
+---
+title: "Class 11 - Scraping multiple webpages"
+author: "Robert Kindle"
+date: "2026-09-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Learning objectives - enable scraping of multiple webpages using a for loop and using the 'purrr' package
+
+### Re-examining the bulletin
+
+[ACC](https://bulletin.miamioh.edu/courses-instruction/acc/)
+[BUS](https://bulletin.miamioh.edu/courses-instruction/bus/)
+[ISA](https://bulletin.miamioh.edu/courses-instruction/isa/)
+[MKT](https://bulletin.miamioh.edu/courses-instruction/mkt/)
+
+```{r bulletin}
+dept_abbrv = c('acc', 'bus', 'isa', 'mkt')
+
+coursesdf = data.frame()
+
+for (abbrv in dept_abbrv) {
+  cat( rep("-", 50), "\n" )
+  print(abbrv)
+  bulletin_url = paste0(
+  'https://bulletin.miamioh.edu/courses-instruction/', abbrv, '/'
+)
+
+webpage = rvest::read_html(bulletin_url)
+
+webpage |> rvest::html_elements("strong") |> rvest::html_text2() -> titles
+webpage |> rvest::html_elements("p.courseblockdesc") |> rvest::html_text2() -> descs
+
+df = data.frame(title = titles, desc = descs)
+coursesdf = rbind(coursesdf, df)
+}
+
+
+```
+
+## 'purrr' approach
+
+```{r}
+dept_abbrv = c('acc', 'bus', 'isa', 'mkt')
+scrape_bulletin = function(abbrv){
+  bulletin_url = paste0(
+  'https://bulletin.miamioh.edu/courses-instruction/', abbrv, '/'
+)
+
+webpage = rvest::read_html(bulletin_url)
+
+webpage |> rvest::html_elements("strong") |> rvest::html_text2() -> titles
+webpage |> rvest::html_elements("p.courseblockdesc") |> rvest::html_text2() -> descs
+
+df = data.frame(title = titles, desc = descs)
+return(df)
+}
+
+# .x is vector we iterate over, .f is function we use
+courses_df_purrr = purrr::map_df(.x = dept_abbrv, .f = scrape_bulletin)
+```
+
+## Scraping from plane crash info
+
+Website = https://www.planecrashinfo.com/
+
+```{r}
+year = 2025
+crash_url = paste0('https://www.planecrashinfo.com/', year, '/', year, '.htm')
+
+crash_page = rvest::read_html(crash_url)
+
+crash_tables <- crash_page |>
+  rvest::html_elements("table") |>
+  rvest::html_table()
+```
+
