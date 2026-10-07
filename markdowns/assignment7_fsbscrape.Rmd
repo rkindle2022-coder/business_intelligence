@@ -1,0 +1,86 @@
+---
+title: "Assignment 7 FSB Scrape"
+author: "Robert Kindle"
+date: "2026-10-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## NOTE: First chunk was meant to test just accountancy, and the second chunk creates the data frame and function.
+## Apologies if it looks really similar to the one in class, I tried to make it unique but this was tough
+
+
+```{r}
+fsb_url = "https://miamioh.edu/fsb/directory/?up=/query/all/all/Accountancy/all"
+
+webpage = rvest::read_html(fsb_url)
+
+rows = webpage |> rvest::html_elements("table tr")
+data_rows = rows[-1]
+
+cat(length(data_rows), "\n\n")
+
+dept = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td") |> rvest::html_text2() |> (\(x) x[1])())
+name = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td a") |> rvest::html_text2())
+website = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td a") |> rvest::html_attr("href"))
+position = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td i") |> rvest::html_text2())
+
+accountancy_df = data.frame(
+  department = dept,
+  name = name,
+  position = position,
+  website = website
+)
+
+accountancy_df |> head()
+```
+
+
+```{r}
+# This function takes a department name as input and returns a data frame as output
+scrape_fsb_faculty = function(dept_name){
+  
+  fsb_url = paste0(
+    "https://miamioh.edu/fsb/directory/?up=/query/all/all/",
+    utils::URLencode(dept_name),
+    "/all"
+  )
+  
+  webpage = rvest::read_html(fsb_url)
+  
+  rows = webpage |> rvest::html_elements("table tr")
+  data_rows = rows[-1]  # drop header row
+  
+  dept     = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td") |> rvest::html_text2() |> (\(x) x[1])())
+  name     = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td a") |> rvest::html_text2())
+  website  = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td a") |> rvest::html_attr("href"))
+  position = data_rows |> purrr::map_chr(\(row) row |> rvest::html_elements("td i") |> rvest::html_text2())
+  
+  df = data.frame(
+    department = dept,
+    name = name,
+    position = position,
+    website = website
+  )
+  
+  return(df)
+}
+
+dept_names = c(
+  "Accountancy",
+  "Economics",
+  "Entrepreneurship",
+  "Finance",
+  "Information Systems -- Analytics",
+  "Marketing",
+  "Management"
+)
+
+fsb_faculty_df = purrr::map_df(.x = dept_names, .f = scrape_fsb_faculty)
+
+fsb_faculty_df |> head()
+```
+
