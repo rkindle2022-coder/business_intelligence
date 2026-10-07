@@ -1,0 +1,38 @@
+---
+title: "Class 13 tidy data"
+author: "Robert Kindle"
+date: "2026-10-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Plane crash example
+
+```{r}
+year = 2025
+crashurl = paste0('https://planecrashinfo.com/', year, '/', year, '.htm')
+crashpage <- rvest::read_html(crashurl, encoding = "ISO-8859-1")
+
+crashpage |>
+  rvest::html_elements("td:nth-child(1) > font > a") |>
+  rvest::html_text2() -> dates
+
+crashpage |>
+  rvest::html_elements("td:nth-child(2) > font") |>
+  rvest::html_text2() -> loc_op
+
+# Skipped column 3, identical, skipped for time reasons
+crashpage |>
+  rvest::html_elements("td:nth-child(4) > font") |>
+  rvest::html_text2() -> fatalities
+
+df = data.frame(dates = dates, fatalities = fatalities[-1], loc = loc_op[-1]) |>
+  tidyr::separate(loc, into = c("location", "operator")) |>
+  tidy::separate(fatalities, into = c("plant_fatalities", "pass", "ground_fatalities"))
+
+dplyr::glimpse(df)
+```
+
